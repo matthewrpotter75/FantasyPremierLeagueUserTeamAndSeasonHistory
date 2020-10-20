@@ -64,7 +64,8 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("UserTeam Repository (insert) error: " + ex.Message);
-                throw ex;
+                throw new Exception("UserTeam Repository (insert) error: " + ex.Message);
+                //throw ex;
             }
         }
 
@@ -155,15 +156,15 @@ namespace FantasyPremierLeagueUserTeams
             }
         }
 
-        public List<int> GetAllUserTeamIds(SqlConnection db)
+        public List<int> GetAllUserTeamIds(int startingUserTeamId, SqlConnection db)
         {
             try
             {
                 //using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
                 //{
-                    string selectQuery = @"SELECT id FROM dbo.UserTeam ORDER BY id;";
+                    string selectQuery = @"SELECT id FROM dbo.UserTeam WITH (NOLOCK) WHERE id >= @StartingUserTeamId;";
 
-                    IDataReader reader = db.ExecuteReader(selectQuery, commandTimeout: 300);
+                    IDataReader reader = db.ExecuteReader(selectQuery, new { StartingUserTeamId = startingUserTeamId }, commandTimeout: 300);
 
                     List<int> result = ReadList(reader);
 
@@ -197,7 +198,7 @@ namespace FantasyPremierLeagueUserTeams
         {
             //using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
             //{
-                string selectQuery = @"SELECT ut.id FROM dbo.UserTeam ut INNER JOIN dbo.Gameweeks g ON ut.current_gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
+                string selectQuery = @"SELECT ut.id FROM dbo.UserTeam ut WITH (NOLOCK) INNER JOIN dbo.Gameweeks g WITH (NOLOCK) ON ut.current_gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WITH (NOLOCK) WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
 
                 IDataReader reader = db.ExecuteReader(selectQuery, commandTimeout: 300);
 
@@ -209,19 +210,58 @@ namespace FantasyPremierLeagueUserTeams
             //}
         }
 
+        public int GetLatestGameweekId(SqlConnection db, string entity)
+        {
+            try
+            {
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    if (entity == "UserTeamGameweekHistory")
+                    {
+                        cmd.CommandText = "GetLatestGameweekId";
+                    }
+                    else
+                    {
+                        cmd.CommandText = "GetActualGameweekId";
+                    }
+
+                    int result = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeam Repository (GetLatestGameweekId) error: " + ex.Message);
+                throw ex;
+            }
+        }
+
         List<int> ReadList(IDataReader reader)
         {
-            List<int> list = new List<int>();
-            int column = reader.GetOrdinal("id");
-
-            while (reader.Read())
+            try
             {
-                //check for the null value and than add 
-                if (!reader.IsDBNull(column))
-                    list.Add(reader.GetInt32(column));
-            }
+                List<int> list = new List<int>();
+                int column = reader.GetOrdinal("id");
 
-            return list;
+                while (reader.Read())
+                {
+                    //check for the null value and than add 
+                    if (!reader.IsDBNull(column))
+                        list.Add(reader.GetInt32(column));
+                }
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeam Repository (ReadList) error: " + ex.Message);
+                throw ex;
+            }
         }
 
     }

@@ -160,13 +160,34 @@ namespace FantasyPremierLeagueUserTeams
             }
         }
 
+        public List<int> GetAllUserTeamIdsWithSeasons(int startingUserTeamId, SqlConnection db)
+        {
+            try
+            {
+                string selectQuery = @"SELECT DISTINCT userteamid AS id FROM dbo.UserTeamSeason WITH (NOLOCK) WHERE userteamid >= @StartingUserTeamId;";
+
+                IDataReader reader = db.ExecuteReader(selectQuery, new { StartingUserTeamId = startingUserTeamId }, commandTimeout: 300);
+
+                List<int> result = ReadList(reader);
+
+                reader.Close();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeamSeason Repository (GetAllUserTeamIdsWithSeasons) error: " + ex.Message);
+                throw ex;
+            }
+        }
+
         public List<int> GetAllUserTeamSeasonIdsForUserTeamId(int userTeamId, SqlConnection db)
         {
             try
             {
                 //using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
                 //{
-                string selectQuery = @"SELECT uts.id FROM dbo.UserTeamSeason uts INNER JOIN dbo.UserTeam ut ON uts.userteamid = ut.id WHERE ut.id = @UserTeamId;";
+                string selectQuery = @"SELECT uts.id FROM dbo.UserTeamSeason uts WITH (NOLOCK) INNER JOIN dbo.UserTeam ut WITH (NOLOCK) ON uts.userteamid = ut.id WHERE ut.id = @UserTeamId;";
 
                 IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId }, commandTimeout: 300);
 
@@ -190,7 +211,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 //using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
                 //{
-                string selectQuery = @"SELECT uts.season_name AS name FROM dbo.UserTeamSeason uts INNER JOIN dbo.UserTeam ut ON uts.userteamid = ut.id WHERE ut.id = @UserTeamId;";
+                string selectQuery = @"SELECT uts.season_name AS name FROM dbo.UserTeamSeason uts WITH (NOLOCK) INNER JOIN dbo.UserTeam ut WITH (NOLOCK) ON uts.userteamid = ut.id WHERE ut.id = @UserTeamId;";
 
                 IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId }, commandTimeout: 300);
 
@@ -236,21 +257,31 @@ namespace FantasyPremierLeagueUserTeams
 
         List<int> ReadList(IDataReader reader)
         {
-            List<int> list = new List<int>();
-            int column = reader.GetOrdinal("id");
-
-            while (reader.Read())
+            try
             {
-                //check for the null value and than add 
-                if (!reader.IsDBNull(column))
-                    list.Add(reader.GetInt32(column));
-            }
+                List<int> list = new List<int>();
+                int column = reader.GetOrdinal("id");
 
-            return list;
+                while (reader.Read())
+                {
+                    //check for the null value and than add 
+                    if (!reader.IsDBNull(column))
+                        list.Add(reader.GetInt32(column));
+                }
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeamSeason Repository (ReadList) error: " + ex.Message);
+                throw ex;
+            }
         }
 
         List<string> ReadListString(IDataReader reader)
         {
+            try
+            { 
             List<string> list = new List<string>();
             int column = reader.GetOrdinal("name");
 
@@ -262,6 +293,12 @@ namespace FantasyPremierLeagueUserTeams
             }
 
             return list;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeamSeason Repository (ReadListString) error: " + ex.Message);
+                throw ex;
+            }
         }
 
     }

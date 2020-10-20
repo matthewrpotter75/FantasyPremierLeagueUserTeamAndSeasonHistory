@@ -13,21 +13,20 @@ namespace FantasyPremierLeagueUserTeams
         static void Main(string[] args)
         {
             XmlConfigurator.Configure();
-            
+
             //string LogName = GetType().Assembly.GetName().Name + ".log";
             //log4net.GlobalContext.Properties["LogName"] = LogName;
 
-            int userTeamRowsInserted = 0;
-            int userTeamSeasonRowsInserted = 0;
-
             UserTeamRepository userTeamRepository = new UserTeamRepository();
             UserTeamSeasonRepository userTeamSeasonRepository = new UserTeamSeasonRepository();
-
-            int userTeamRetries = 0;
-            int userTeamRowsAdded = 0;
+            UserTeamClassicLeagueRepository userTeamClassicLeagueRepository = new UserTeamClassicLeagueRepository();
 
             UserTeams userTeamInsert = new UserTeams();
             UserTeamSeasons userTeamSeasonsInsert = new UserTeamSeasons();
+            UserTeamGameweekHistories userTeamGameweekHistoriesInsert = new UserTeamGameweekHistories();
+            UserTeamChips userTeamChipsInsert = new UserTeamChips();
+            UserTeamClassicLeagues userTeamClassicLeaguesInsert = new UserTeamClassicLeagues();
+            UserTeamH2hLeagues userTeamH2hLeaguesInsert = new UserTeamH2hLeagues();
 
             SqlConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam202021"].ConnectionString);
 
@@ -35,6 +34,8 @@ namespace FantasyPremierLeagueUserTeams
             {
                 Logger.Out("Starting...");
                 Logger.Out("");
+
+                int userTeamRetries = 0;
 
                 int startingUserTeamId = 1;
                 bool test = true;
@@ -59,44 +60,64 @@ namespace FantasyPremierLeagueUserTeams
                 string userTeamUrl = ConfigSettings.ReadSetting("userTeamURL");
                 //string userTeamLeaguesUrl = ConfigSettings.ReadSetting("userTeamLeaguesURL");
 
-                List<int> userTeamIds = Enumerable.Range(startingUserTeamId, 8000000 - startingUserTeamId).ToList();
-
                 using (db)
                 {
                     db.Open();
 
-                    List<int> completedUserTeamIds = userTeamRepository.GetAllUserTeamIds(db);
+                    SetLatestGameweek("UserTeamGameweekHistory");
+                    SetActualGameweek("UserTeamGameweekPick");
 
-                    List<int> toDoUserTeamIds = userTeamIds.Except(completedUserTeamIds).ToList();
+                    //List<string> userTeamSeasonNames;
 
-                    Logger.Out(startingUserTeamId.ToString());
+                    Logger.Out("Starting GetAllUserTeamIds call");
+                    List<int> existingUserTeamIds = userTeamRepository.GetAllUserTeamIds(startingUserTeamId, db);
+                    Logger.Out("Starting GetAllUserTeamIdsWithLeagues call");
+                    List<int> userTeamIdsWithLeagues = userTeamClassicLeagueRepository.GetAllUserTeamIdsWithLeagues(startingUserTeamId, db);
+                    Logger.Out("Starting GetAllUserTeamIdsWithSeasons call");
+                    List<int> userTeamIdsWithSeasons = userTeamSeasonRepository.GetAllUserTeamIdsWithSeasons(startingUserTeamId, db);
 
-                    foreach (int userTeamId in toDoUserTeamIds)
-                    {
-                        userTeamRowsAdded += 1;
-                        userTeamRetries = 0;
+                    List<int> userTeamIds = Enumerable.Range(startingUserTeamId, 8000000 - startingUserTeamId).ToList();
 
-                        // Get the fantasyPremierLeaguePl1ayerData using JSON.NET
-                        FantasyPremierLeagueAPIClient.GetUserTeamDataJson(userTeamId, completedUserTeamIds, userTeamUrl, userTeamInsert, userTeamSeasonsInsert, userTeamRetries, userTeamRowsAdded, db);
+                    //List<int> toDoUserTeamIds = userTeamIds.Except(userTeamIdsWithLeagues).ToList();
+                    List<int> toDoUserTeamIds = userTeamIds.Except(existingUserTeamIds).ToList();
 
-                        if (userTeamRowsAdded >= 5000)
-                        //if (userTeamRowsAdded >= 10)
-                        {
-                            WriteToDB(userTeamRowsInserted, userTeamSeasonRowsInserted, userTeamInsert, userTeamSeasonsInsert, db);
+                    Logger.Out("");
+                    Logger.Out("Starting UserTeamId" + startingUserTeamId.ToString());
+                    Logger.Out("");
 
-                            userTeamRowsAdded = 0;
-                            userTeamRowsInserted = 0;
-                            userTeamSeasonRowsInserted = 0;
+                    Globals.apiCalls = 0;
+                    Globals.apiUserTeamCalls = 0;
+                    Globals.apiUserTeamHistoryCalls = 0;
+                    Globals.userTeamInsertCount = 0;
 
-                            userTeamInsert.Clear();
-                            userTeamSeasonsInsert.Clear();
+                    //NEW CALL
+                    FantasyPremierLeagueAPIClient.GetUserTeamDataJson(startingUserTeamId, toDoUserTeamIds, existingUserTeamIds, userTeamIdsWithSeasons, userTeamUrl, userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, db);
 
-                            Logger.Out(userTeamId.ToString());
-                            Logger.Out("");
-                        }
+                    //foreach (int userTeamId in toDoUserTeamIds)
+                    //{
+                    //    userTeamRowsAdded += 1;
+                    //    userTeamRetries = 0;
 
-                        completedUserTeamIds.Add(userTeamId);
-                    }
+                    //    //userTeamSeasonNames = userTeamSeasonRepository.GetAllUserTeamSeasonNamesForUserTeamId(userTeamId, db);
+
+                    //    //if (userTeamSeasonNames.Count == 0)
+                    //    //{
+                    //    // Get the fantasyPremierLeaguePl1ayerData using JSON.NET
+                    //    FantasyPremierLeagueAPIClient.GetUserTeamDataJson(userTeamId, existingUserTeamIds, userTeamIdsWithSeasons, userTeamUrl, userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, userTeamRowsAdded, db);
+                    //    //}
+
+                    //    if (userTeamRowsAdded >= 500)
+                    //    {
+                    //        WriteToDB(userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
+
+                    //        userTeamRowsAdded = 0;
+
+                    //        Logger.Out(userTeamId.ToString());
+                    //        Logger.Out("");
+                    //    }
+
+                    //    existingUserTeamIds.Add(userTeamId);
+                    //}
 
                     db.Close();
 
@@ -112,31 +133,43 @@ namespace FantasyPremierLeagueUserTeams
             }
             catch (Exception ex)
             {
-                Logger.Error(ex.Message);
-                //Logger.Error(userTeamName + " caused error!!!");
-
-                WriteToDB(userTeamRowsInserted, userTeamSeasonRowsInserted, userTeamInsert, userTeamSeasonsInsert, db);
-
+                Logger.Error("Program error: " + ex.Message);
                 throw ex;
             }
         }
 
-        public static void WriteToDB(int userTeamRowsInserted, int userTeamSeasonRowsInserted, UserTeams userTeamInsert, UserTeamSeasons userTeamSeasonsInsert, SqlConnection db)
+        private static void SetLatestGameweek(string entity)
         {
+            int latestGameweek;
             UserTeamRepository userTeamRepository = new UserTeamRepository();
-            UserTeamSeasonRepository userTeamSeasonRepository = new UserTeamSeasonRepository();
 
-            Logger.Out("");
+            using (SqlConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeague"].ConnectionString))
+            {
+                db.Open();
 
-            //Write UserTeamSeason to the db
-            userTeamRowsInserted = userTeamRepository.InsertUserTeam(userTeamInsert, db);
-            Logger.Out("UserTeam bulk insert complete (UserTeam rows inserted: " + Convert.ToString(userTeamRowsInserted) + ")");
+                latestGameweek = userTeamRepository.GetLatestGameweekId(db, entity);
 
-            //Write UserTeamSeason to the db
-            userTeamSeasonRowsInserted = userTeamSeasonRepository.InsertUserTeamSeason(userTeamSeasonsInsert, db);
-            Logger.Out("UserTeamSeason bulk insert complete (UserTeamSeason rows inserted: " + Convert.ToString(userTeamSeasonRowsInserted) + ")");
+                Globals.latestGameweek = latestGameweek;
 
-            Logger.Out("");
+                db.Close();
+            }
+        }
+
+        private static void SetActualGameweek(string entity)
+        {
+            int latestGameweek;
+            UserTeamRepository userTeamRepository = new UserTeamRepository();
+
+            using (SqlConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeague"].ConnectionString))
+            {
+                db.Open();
+
+                latestGameweek = userTeamRepository.GetLatestGameweekId(db, entity);
+
+                Globals.actualGameweek = latestGameweek;
+
+                db.Close();
+            }
         }
     }
 }

@@ -84,6 +84,17 @@
   <ItemGroup>
     <Compile Include="API\FantasyPremierLeagueAPI_UserTeamHistory.cs" />
     <Compile Include="API\FantasyPremierLeagueAPI_UserTeam.cs" />
+    <Compile Include="Globals.cs" />
+    <Compile Include="Interfaces\IUserTeamChip.cs" />
+    <Compile Include="Interfaces\IUserTeamClassicLeague.cs" />
+    <Compile Include="Interfaces\IUserTeamCup.cs" />
+    <Compile Include="Interfaces\IUserTeamGameweekHistory.cs" />
+    <Compile Include="Interfaces\IUserTeamH2hLeague.cs" />
+    <Compile Include="Repositories\UserTeamChipRepository.cs" />
+    <Compile Include="Repositories\UserTeamClassicLeagueRepository.cs" />
+    <Compile Include="Repositories\UserTeamCupRepository.cs" />
+    <Compile Include="Repositories\UserTeamGameweekHistoryRepository.cs" />
+    <Compile Include="Repositories\UserTeamH2hLeagueRepoitory.cs" />
     <Compile Include="UserTeamChipId.cs" />
     <Compile Include="ConfigSettings.cs" />
     <Compile Include="DataClasses\FantasyPremierLeagueLeaguesData.cs" />
