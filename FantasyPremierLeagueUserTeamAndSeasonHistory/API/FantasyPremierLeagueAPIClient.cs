@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 
 namespace FantasyPremierLeagueUserTeams
 {
@@ -51,68 +48,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 Logger.Error("GetUserTeamDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
                 Globals.userTeamRowsProcessed += 1;
-
-                //userTeamRetries = 0;
-
-                //if (db.State == ConnectionState.Closed)
-                //{
-                //    db.ConnectionString = ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam202021"].ConnectionString;
-                //    db.Open();
-                //}
-
-                //If error is thrown from sub program write existing records to the DB
-                //WriteToDB(userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
-                //Globals.userTeamRowsProcessed = 0;
-
-                //Logger.Out(userTeamId.ToString());
-                //Logger.Out("");
-
-                //userTeamRetries = 0;
-                //toDoUserTeamIds.Remove(userTeamId);
-                //toDoUserTeamIds = toDoUserTeamIds.Except(Globals.processedUserTeamIds).ToList();
-
-                //toDoUserTeamIds.Remove(userTeamId);
-                //toDoUserTeamIds = toDoUserTeamIds.Except(Globals.processedUserTeamIds).ToList();
-                //GetUserTeamDataJson(startingUserTeamId, toDoUserTeamIds, existingUserTeamIds, userTeamIdsWithSeasons, userTeamUrl, userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, db);
             }
-            //catch (Exception ex)
-            //{
-            //    Logger.Error("GetUserTeamDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-
-            //    if (userTeamRetries < 10)
-            //    {
-            //        if (userTeamRetries == 1)
-            //        {
-            //            Logger.Error("GetUserTeamDataJson data exception (starting retries) (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-            //            Logger.Error("GetUserTeamDataJson data exception (retry:" + Convert.ToString(userTeamRetries) + ") (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-            //        }
-            //        else
-            //        {
-            //            Logger.Error("GetUserTeamDataJson data exception (retry:" + Convert.ToString(userTeamRetries) + ") (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-            //        }
-            //        userTeamRetries += 1;
-            //        GetUserTeamDataJson(startingUserTeamId, toDoUserTeamIds, existingUserTeamIds, userTeamIdsWithSeasons, userTeamUrl, userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, db);
-            //    }
-            //    else
-            //    {
-            //        Logger.Error("GetUserTeamDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-            //        //throw new Exception("GetUserTeamDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-
-            //        if (db.State == ConnectionState.Closed)
-            //        {
-            //            db.ConnectionString = ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam202021"].ConnectionString;
-            //            db.Open();
-            //        }
-
-            //        //If error is thrown from sub program write existing records to the DB
-            //        WriteToDB(userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
-
-            //        userTeamRetries = 0;
-            //        toDoUserTeamIds.Remove(userTeamId);
-            //        toDoUserTeamIds = toDoUserTeamIds.Except(processedUserTeamIds).ToList();
-            //        GetUserTeamDataJson(startingUserTeamId, toDoUserTeamIds, existingUserTeamIds, userTeamIdsWithSeasons, userTeamUrl, userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, db);
-            //    }
-            //}
         }
         public static void WriteToDB(UserTeams userTeamInsert, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamChips userTeamChipsInsert, UserTeamSeasons userTeamSeasonsInsert, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, SqlConnection db)
         {

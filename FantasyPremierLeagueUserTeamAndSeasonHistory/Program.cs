@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Data.SqlClient;
 using System.Configuration;
-using System.Data;
 using log4net.Config;
 
 namespace FantasyPremierLeagueUserTeams
@@ -97,37 +96,8 @@ namespace FantasyPremierLeagueUserTeams
                     Globals.apiUserTeamHistoryCalls = 0;
                     Globals.userTeamInsertCount = 0;
 
-                    //NEW CALL
                     FantasyPremierLeagueAPIClient.GetUserTeamDataJson(startingUserTeamId, toDoUserTeamIds, existingUserTeamIds, userTeamIdsWithSeasons, userTeamUrl, userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, db);
-
-                    //foreach (int userTeamId in toDoUserTeamIds)
-                    //{
-                    //    userTeamRowsAdded += 1;
-                    //    userTeamRetries = 0;
-
-                    //    //userTeamSeasonNames = userTeamSeasonRepository.GetAllUserTeamSeasonNamesForUserTeamId(userTeamId, db);
-
-                    //    //if (userTeamSeasonNames.Count == 0)
-                    //    //{
-                    //    // Get the fantasyPremierLeaguePl1ayerData using JSON.NET
-                    //    FantasyPremierLeagueAPIClient.GetUserTeamDataJson(userTeamId, existingUserTeamIds, userTeamIdsWithSeasons, userTeamUrl, userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, userTeamRowsAdded, db);
-                    //    //}
-
-                    //    if (userTeamRowsAdded >= 500)
-                    //    {
-                    //        WriteToDB(userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
-
-                    //        userTeamRowsAdded = 0;
-
-                    //        Logger.Out(userTeamId.ToString());
-                    //        Logger.Out("");
-                    //    }
-
-                    //    existingUserTeamIds.Add(userTeamId);
-                    //}
-
                     db.Close();
-
                 }
 
                 Logger.Out("UserTeams data load complete");

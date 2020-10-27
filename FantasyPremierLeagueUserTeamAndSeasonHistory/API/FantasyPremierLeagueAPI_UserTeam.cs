@@ -5,14 +5,11 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net;
 using System.Data.SqlClient;
-using System.Configuration;
-using System.Data;
 
 namespace FantasyPremierLeagueUserTeams
 {
     public class FantasyPremierLeagueAPIUserTeam
     {
-        //public static void GetUserTeamJson(int userTeamId, List<int> userTeamIds, UserTeam userTeam)
         public static void GetUserTeamData(int userTeamId, List<int> userTeamIds, string userTeamUrl, UserTeams userTeamInsert, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, SqlConnection db)
         {
             try
