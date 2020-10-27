@@ -11,74 +11,69 @@ namespace FantasyPremierLeagueUserTeams
     {
         public static void GetUserTeamDataJson(int startingUserTeamId, List<int> toDoUserTeamIds, List<int> existingUserTeamIds, List<int> userTeamIdsWithSeasons, string userTeamUrl, UserTeams userTeamInsert, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamChips userTeamChipsInsert, UserTeamSeasons userTeamSeasonsInsert, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, int userTeamRetries, SqlConnection db)
         {
-            var url = "";
             int userTeamId = 0;
-            int userTeamRowsProcessed = 0;
-
-            List<int> processedUserTeamIds = new List<int>();
+            Globals.userTeamRowsProcessed = 0;
 
             try
             {
-                if (db.State == ConnectionState.Closed)
-                {
-                    db.ConnectionString = ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam202021"].ConnectionString;
-                    db.Open();
-                }
-
                 foreach (int loopUserTeamId in toDoUserTeamIds)
                 {
                     userTeamId = loopUserTeamId;
 
-                    url = string.Format(userTeamUrl, userTeamId);
+                    //url = string.Format(userTeamUrl, userTeamId);
 
-                    //userTeamSeasonNames = userTeamSeasonRepository.GetAllUserTeamSeasonNamesForUserTeamId(userTeamId, db);
+                    FantasyPremierLeagueAPIClientLoop.GetUserTeamDataJsonLoop(startingUserTeamId, userTeamId, toDoUserTeamIds, existingUserTeamIds, userTeamIdsWithSeasons, userTeamUrl, userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, db);
 
-                    //if (userTeamSeasonNames.Count == 0)
-                    //{
-                    // Get the fantasyPremierLeaguePl1ayerData using JSON.NET
-                    //FantasyPremierLeagueAPIClient.GetUserTeamDataJson(userTeamId, existingUserTeamIds, userTeamIdsWithSeasons, userTeamUrl, userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, userTeamRowsAdded, db);
-
-                    //Process UserTeam, UserTeamClassicLeague, UserTeamH2hLeague, UserTeamCup
-                    FantasyPremierLeagueAPIUserTeam.GetUserTeamData(userTeamId, existingUserTeamIds, userTeamUrl, userTeamInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRowsProcessed, db);
-
-                    //Process UserTeamSeasonHistory
-                    if (!userTeamIdsWithSeasons.Contains(userTeamId))
-                    {
-                        FantasyPremierLeagueAPIGameweekHistory.GetUserTeamHistoryDataJson(userTeamId, userTeamIdsWithSeasons, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, db);
-                    }
-                    //}
-
-                    if (userTeamRowsProcessed >= 500)
+                    if (Globals.userTeamRowsProcessed >= 500)
                     {
                         WriteToDB(userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
 
-                        userTeamRowsProcessed = 0;
+                        Globals.userTeamRowsProcessed = 0;
 
                         Logger.Out(userTeamId.ToString());
                         Logger.Out("");
                     }
                     else
                     {
-                        userTeamRowsProcessed += 1;
+                        Globals.userTeamRowsProcessed += 1;
                     }
 
                     existingUserTeamIds.Add(userTeamId);
-                    processedUserTeamIds.Add(userTeamId);
+                    //Globals.processedUserTeamIds.Add(userTeamId);
 
                     //var itemToRemove = toDoUserTeamIds.SingleOrDefault(r => r == userTeamId);
                     //toDoUserTeamIds.Remove(itemToRemove);
                 }
 
-                //Logger.Out("");
+                WriteToDB(userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
             }
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                Globals.userTeamRowsProcessed += 1;
 
                 //userTeamRetries = 0;
-                toDoUserTeamIds.Remove(userTeamId);
-                toDoUserTeamIds = toDoUserTeamIds.Except(processedUserTeamIds).ToList();
-                GetUserTeamDataJson(startingUserTeamId, toDoUserTeamIds, existingUserTeamIds, userTeamIdsWithSeasons, userTeamUrl, userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, db);
+
+                //if (db.State == ConnectionState.Closed)
+                //{
+                //    db.ConnectionString = ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam202021"].ConnectionString;
+                //    db.Open();
+                //}
+
+                //If error is thrown from sub program write existing records to the DB
+                //WriteToDB(userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
+                //Globals.userTeamRowsProcessed = 0;
+
+                //Logger.Out(userTeamId.ToString());
+                //Logger.Out("");
+
+                //userTeamRetries = 0;
+                //toDoUserTeamIds.Remove(userTeamId);
+                //toDoUserTeamIds = toDoUserTeamIds.Except(Globals.processedUserTeamIds).ToList();
+
+                //toDoUserTeamIds.Remove(userTeamId);
+                //toDoUserTeamIds = toDoUserTeamIds.Except(Globals.processedUserTeamIds).ToList();
+                //GetUserTeamDataJson(startingUserTeamId, toDoUserTeamIds, existingUserTeamIds, userTeamIdsWithSeasons, userTeamUrl, userTeamInsert, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, db);
             }
             //catch (Exception ex)
             //{
@@ -119,7 +114,6 @@ namespace FantasyPremierLeagueUserTeams
             //    }
             //}
         }
-
         public static void WriteToDB(UserTeams userTeamInsert, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamChips userTeamChipsInsert, UserTeamSeasons userTeamSeasonsInsert, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, SqlConnection db)
         {
             try

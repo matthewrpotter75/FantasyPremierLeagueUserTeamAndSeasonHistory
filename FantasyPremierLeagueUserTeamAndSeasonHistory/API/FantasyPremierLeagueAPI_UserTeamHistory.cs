@@ -170,7 +170,7 @@ namespace FantasyPremierLeagueUserTeams
                     userTeamSeason.userteamid = userTeamId;
                     //userTeamSeason.season = userTeamSeasonRepository.GetSeasonIdFromSeasonName(userTeamSeason.season_name);
 
-                    if (!UserTeamSeasonNames.Contains(userTeamSeason.season_name))
+                    if (!UserTeamSeasonNames.Contains(userTeamSeason.season_name) && !userTeamSeasonsInsert.Contains(userTeamSeason))
                     {
                         userTeamSeasonsInsert.Add(userTeamSeason);
                     }

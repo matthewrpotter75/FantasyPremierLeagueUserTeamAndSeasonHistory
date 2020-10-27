@@ -57,6 +57,8 @@ namespace FantasyPremierLeagueUserTeams
                 Logger.Out("Starting UserTeams data load");
                 Logger.Out("");
 
+                FantasyPremierLeagueAPI_Bootstrap.GetPlayerBootstrapDataJson();
+
                 string userTeamUrl = ConfigSettings.ReadSetting("userTeamURL");
                 //string userTeamLeaguesUrl = ConfigSettings.ReadSetting("userTeamLeaguesURL");
 
@@ -76,7 +78,12 @@ namespace FantasyPremierLeagueUserTeams
                     Logger.Out("Starting GetAllUserTeamIdsWithSeasons call");
                     List<int> userTeamIdsWithSeasons = userTeamSeasonRepository.GetAllUserTeamIdsWithSeasons(startingUserTeamId, db);
 
-                    List<int> userTeamIds = Enumerable.Range(startingUserTeamId, 8000000 - startingUserTeamId).ToList();
+                    int userTeamsToProcess = Globals.bootstrapUserTeamCount - startingUserTeamId;
+
+                    if (userTeamsToProcess < 0)
+                        userTeamsToProcess = 0;
+
+                    List<int> userTeamIds = Enumerable.Range(startingUserTeamId, userTeamsToProcess).ToList();
 
                     //List<int> toDoUserTeamIds = userTeamIds.Except(userTeamIdsWithLeagues).ToList();
                     List<int> toDoUserTeamIds = userTeamIds.Except(existingUserTeamIds).ToList();

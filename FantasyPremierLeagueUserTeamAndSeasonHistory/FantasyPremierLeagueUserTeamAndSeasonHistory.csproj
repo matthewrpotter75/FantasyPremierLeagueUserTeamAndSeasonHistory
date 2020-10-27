@@ -82,6 +82,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\FantasyPremierLeagueAPIClient_UserTeamLoop.cs" />
+    <Compile Include="API\FantasyPremierLeagueAPI_Bootstrap.cs" />
     <Compile Include="API\FantasyPremierLeagueAPI_UserTeamHistory.cs" />
     <Compile Include="API\FantasyPremierLeagueAPI_UserTeam.cs" />
     <Compile Include="Globals.cs" />
